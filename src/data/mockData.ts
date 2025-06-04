@@ -1,19 +1,9 @@
-interface Song {
-  id: string | number;
-  title: string;
-  duration: string; // e.g., "3:45"
-}
+//  src/data/mockData.ts
+import type { IAlbum } from '@/types/IAlbum';
+import type { ISong } from '@/types/ISong';
 
-interface Album {
-  id: string | number;
-  title: string;
-  artist: string;
-  cover: string;
-  songs: Song[];
-}
-
-export const generateMockAlbum = (index: number): Album => {
-  const songs: Song[] = Array.from({ length: 5 }, (_, i) => ({
+export const generateMockAlbum = (index: number): IAlbum => {
+  const songs: ISong[] = Array.from({ length: 5 }, (_, i) => ({
     id: `${index}-${i}`,
     title: `Song ${i + 1} of Album ${index}`,
     duration: `${Math.floor(Math.random() * 4 + 2)}:${Math.floor(Math.random() * 60)
@@ -30,6 +20,6 @@ export const generateMockAlbum = (index: number): Album => {
   };
 };
 
-export const generateMockData = (count: number): Album[] => {
+export const generateMockData = (count: number): IAlbum[] => {
   return Array.from({ length: count }, (_, i) => generateMockAlbum(i + 1));
 };
