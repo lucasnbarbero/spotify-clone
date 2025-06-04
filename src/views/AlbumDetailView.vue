@@ -1,14 +1,37 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { generateMockData } from '@/data/mockData';
+
+import type { IAlbum } from '@/types/IAlbum';
 
 const route = useRoute();
 
-const albumId = computed(() => route.params.id as string);
+const albumId = route.params.id as string;
+
+const albums = generateMockData(12);
+
+const selectedAlbum = computed((): IAlbum | undefined => {
+  return albums.find((album) => album.id.toString() === albumId);
+});
 </script>
 
 <template>
   <div>
-    <p>Página de Detalle del Àlbum: [{{ albumId }}]</p>
+    <template v-if="selectedAlbum">
+      <h1>{{ selectedAlbum.title }}</h1>
+      <h2>{{ selectedAlbum.artist }}</h2>
+
+      <h3>Canciones:</h3>
+      <ul>
+        <li v-for="song in selectedAlbum.songs" :key="song.id">
+          {{ song.title }} - {{ song.duration }}
+        </li>
+      </ul>
+    </template>
+
+    <template v-else>
+      <p>Álbum no encontrado.</p>
+    </template>
   </div>
 </template>
