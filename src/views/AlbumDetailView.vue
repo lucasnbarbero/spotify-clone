@@ -34,24 +34,37 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="p-6">
     <template v-if="isLoading">
-      <p>Cargando álbum...</p>
+      <p class="text-white">Cargando álbum...</p>
     </template>
-    <template v-else-if="selectedAlbum">
-      <h1>{{ selectedAlbum.title }}</h1>
-      <h2>{{ selectedAlbum.artist }}</h2>
 
-      <h3>Canciones:</h3>
-      <ul>
-        <li v-for="song in selectedAlbum.songs" :key="song.id" @click="reproduceSong(song)">
-          {{ song.title }} - {{ song.duration }}
+    <template v-else-if="selectedAlbum">
+      <div class="mb-6">
+        <h1 class="text-white text-3xl font-bold">{{ selectedAlbum.title }}</h1>
+        <h2 class="text-gray-400 text-xl">{{ selectedAlbum.artist }}</h2>
+      </div>
+
+      <h3 class="text-white text-lg font-semibold mb-2">Canciones:</h3>
+      <ul class="divide-y divide-gray-700">
+        <li
+          v-for="song in selectedAlbum.songs"
+          :key="song.id"
+          @click="reproduceSong(song)"
+          class="cursor-pointer px-4 py-3 flex justify-between items-center rounded hover:bg-gray-800 transition-colors duration-150"
+          :class="{
+            'text-green-500 bg-gray-700': playerStore.currentSong?.id === song.id,
+            'text-white': playerStore.currentSong?.id !== song.id
+          }"
+        >
+          <span class="truncate">{{ song.title }}</span>
+          <span class="text-sm text-gray-400">{{ song.duration }}</span>
         </li>
       </ul>
     </template>
 
     <template v-else>
-      <p>Álbum no encontrado.</p>
+      <p class="text-red-500">Álbum no encontrado.</p>
     </template>
   </div>
 </template>
