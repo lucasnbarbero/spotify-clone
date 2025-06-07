@@ -12,6 +12,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/AlbumDetailView.vue'),
     props: true, // ⬅️ útil si querés recibir el id como prop
   },
+  {
+    path: '/library',
+    name: 'LibraryView',
+    component: () => import('@/views/LibraryView.vue'),
+  },
 ];
 
 export default routes;
