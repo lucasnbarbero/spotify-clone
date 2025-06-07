@@ -1,6 +1,5 @@
 //  src/stores/player.store.ts
 import { defineStore } from 'pinia';
-
 import type { ISong } from '@/types/ISong';
 
 interface PlayerState {
@@ -8,6 +7,9 @@ interface PlayerState {
   isPlaying: boolean;
   currentTime: number;
   intervalId: number | null;
+  volume: number;
+  isMuted: boolean;
+  previousVolume: number;
 }
 
 export const usePlayerStore = defineStore('player', {
@@ -16,6 +18,9 @@ export const usePlayerStore = defineStore('player', {
     isPlaying: false,
     currentTime: 0,
     intervalId: null,
+    volume: 100,
+    isMuted: false,
+    previousVolume: 100,
   }),
 
   getters: {
@@ -51,7 +56,7 @@ export const usePlayerStore = defineStore('player', {
     },
 
     startProgress() {
-      if (this.intervalId ) return;
+      if (this.intervalId) return;
 
       this.intervalId = window.setInterval(() => {
         if (!this.isPlaying) return;
@@ -70,6 +75,22 @@ export const usePlayerStore = defineStore('player', {
       if (this.intervalId) {
         clearInterval(this.intervalId);
         this.intervalId = null;
+      }
+    },
+
+    setVolume(value: number) {
+      this.volume = value;
+      this.isMuted = value === 0;
+    },
+
+    toggleMute() {
+      if (this.isMuted) {
+        this.volume = this.previousVolume || 100;
+        this.isMuted = false;
+      } else {
+        this.previousVolume = this.volume;
+        this.volume = 0;
+        this.isMuted = true;
       }
     },
   },

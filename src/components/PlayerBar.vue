@@ -7,6 +7,17 @@ const playerStore = usePlayerStore();
 
 const isCurrentSong = computed(() => playerStore.currentSong === null);
 
+const volumeValue = computed({
+  get: () => playerStore.volume,
+  set: (value: number) => {
+    playerStore.setVolume(value);
+  },
+});
+
+function toggleMute() {
+  playerStore.toggleMute();
+}
+
 onUnmounted(() => {
   playerStore.stopProgress();
 });
@@ -47,6 +58,30 @@ onUnmounted(() => {
         <p class="text-xs text-neutral-400 mt-1 text-center md:text-right">
           {{ playerStore.currentTime }}s / {{ playerStore.durationInSeconds }}
         </p>
+      </div>
+
+      <!-- Controles de Volumen -->
+      <div class="flex items-center gap-2">
+        <button @click="toggleMute" :title="playerStore.isMuted ? 'Desmutear' : 'Mutear'">
+          <Icon
+            :icon="
+              playerStore.isMuted || playerStore.volume === 0
+                ? 'material-symbols:volume-off'
+                : playerStore.volume <= 50
+                  ? 'material-symbols:volume-down'
+                  : 'material-symbols:volume-up'
+            "
+            class="w-5 h-5 text-white"
+          />
+        </button>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          v-model="volumeValue"
+          class="w-24"
+          :disabled="isCurrentSong"
+        />
       </div>
     </div>
   </div>
