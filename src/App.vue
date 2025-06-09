@@ -4,6 +4,7 @@ import { useFavotiresStore } from './stores/favorites.store';
 import Header from './components/Header.vue';
 import Sidebar from './components/Sidebar.vue';
 import PlayerBar from './components/PlayerBar.vue';
+import ToastNotification from './components/ToastNotification.vue';
 
 const favoritesStore = useFavotiresStore();
 
@@ -24,5 +25,6 @@ favoritesStore.loadFromLocalStorage();
     <PlayerBar
       class="fixed bottom-0 left-0 right-0 bg-neutral-900 border-t border-neutral-800 p-4 z-10"
     />
+    <ToastNotification />
   </div>
 </template>
