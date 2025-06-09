@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { useFavotiresStore } from './stores/favorites.store';
+
 import Header from './components/Header.vue';
 import Sidebar from './components/Sidebar.vue';
 import PlayerBar from './components/PlayerBar.vue';
+
+const favoritesStore = useFavotiresStore();
+
+favoritesStore.loadFromLocalStorage();
 </script>
 
 <template>
