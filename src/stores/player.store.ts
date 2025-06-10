@@ -1,97 +1,132 @@
 //  src/stores/player.store.ts
+import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import type { ISong } from '@/types/ISong';
 
-interface PlayerState {
-  currentSong: ISong | null;
-  isPlaying: boolean;
-  currentTime: number;
-  intervalId: number | null;
-  volume: number;
-  isMuted: boolean;
-  previousVolume: number;
-}
+export const usePlayerStore = defineStore('player', () => {
+  //  Estado
+  const currentSong = ref<ISong | null>(null);
+  const currentTime = ref(0);
+  const isPlaying = ref(false);
+  const isMuted = ref(false);
+  const volume = ref(100);
 
-export const usePlayerStore = defineStore('player', {
-  state: (): PlayerState => ({
-    currentSong: null,
-    isPlaying: false,
-    currentTime: 0,
-    intervalId: null,
-    volume: 100,
-    isMuted: false,
-    previousVolume: 100,
-  }),
+  const playlist = ref<ISong[]>([]);
+  const currentIndex = ref<number | null>(null);
 
-  getters: {
-    currentSongTitle: (state) => (state.currentSong ? state.currentSong.title : 'Niguna'),
-    currentSongDuration: (state) => (state.currentSong ? state.currentSong.duration : '--:--'),
-    durationInSeconds: (state) => {
-      if (!state.currentSong) return 0;
-      const [min, sec] = state.currentSong.duration.split(':').map(Number);
-      return min * 60 + sec;
-    },
-    progressPercentage: (state): number => {
-      const total = (state as any).durationInSeconds;
-      return total === 0 ? 0 : Math.min((state.currentTime / total) * 100, 100);
-    },
-  },
+  //  Intervalo para la simulación del progreso
+  let progessInterval: number | null = null;
 
-  actions: {
-    playSong(song: ISong) {
-      this.stopProgress();
-      this.currentSong = song;
-      this.currentTime = 0;
-      this.isPlaying = true;
-      this.startProgress();
-    },
+  const currentSongTitle = computed(() => currentSong.value?.title ?? 'Sin canción');
+  const currentSongDuration = computed(() => currentSong.value?.duration ?? '00:00');
 
-    togglePlayPause() {
-      this.isPlaying = !this.isPlaying;
-      this.isPlaying ? this.startProgress() : this.stopProgress();
-    },
+  const durationInSeconds = computed(() => {
+    const duration = currentSong.value?.duration;
+    if (!duration) return 0;
 
-    updateProgress(time: number) {
-      this.currentTime = time;
-    },
+    const [minStr, secStr] = duration.split(':');
+    const min = parseInt(minStr);
+    const sec = parseInt(secStr);
+    return min * 60 + sec;
+  });
 
-    startProgress() {
-      if (this.intervalId) return;
+  function setPlaylist(songs: ISong[]) {
+    playlist.value = songs;
+  }
 
-      this.intervalId = window.setInterval(() => {
-        if (!this.isPlaying) return;
+  function playSong(song: ISong) {
+    stopProgress();
+    currentSong.value = song;
+    currentIndex.value = playlist.value.findIndex((s) => s.id === song.id);
+    currentTime.value = 0;
+    isPlaying.value = true;
+    startProgress();
+  }
 
-        if (this.currentTime >= this.durationInSeconds) {
-          this.stopProgress();
-          this.isPlaying = false;
-          return;
-        }
+  function togglePlayPause() {
+    if (!currentSong.value) return;
+    isPlaying.value = !isPlaying.value;
+    if (isPlaying.value) startProgress();
+    else stopProgress();
+  }
 
-        this.currentTime++;
-      }, 1000);
-    },
-
-    stopProgress() {
-      if (this.intervalId) {
-        clearInterval(this.intervalId);
-        this.intervalId = null;
-      }
-    },
-
-    setVolume(value: number) {
-      this.volume = value;
-      this.isMuted = value === 0;
-    },
-
-    toggleMute() {
-      if (this.isMuted) {
-        this.volume = this.previousVolume || 100;
-        this.isMuted = false;
+  function startProgress() {
+    stopProgress();
+    progessInterval = setInterval(() => {
+      if (currentTime.value < durationInSeconds.value) {
+        currentTime.value += 1;
       } else {
-        this.previousVolume = this.volume;
-        this.volume = 0;
-        this.isMuted = true;
+        playNextSong();
       }
-    },
-  },
+    }, 1000);
+  }
+
+  function stopProgress() {
+    if (progessInterval) {
+      clearInterval(progessInterval);
+      progessInterval = null;
+    }
+  }
+
+  function setCurrentTime(time: number) {
+    currentTime.value = Math.min(time, durationInSeconds.value);
+  }
+
+  function setVolume(newVolume: number) {
+    volume.value = newVolume;
+    isMuted.value = newVolume === 0;
+  }
+
+  function toggleMute() {
+    isMuted.value = !isMuted.value;
+    if (isMuted.value) volume.value = 0;
+    else volume.value = 100;
+  }
+
+  function playNextSong() {
+    if (playlist.value.length === 0 || currentIndex.value === null) return;
+
+    const nextIndex = currentIndex.value + 1;
+
+    if (nextIndex < playlist.value.length) {
+      playSong(playlist.value[nextIndex]);
+    } else {
+      stopProgress();
+      isPlaying.value = false;
+    }
+  }
+
+  function playPreviousSong() {
+    if (playlist.value.length === 0 || currentIndex.value === null) return;
+    const prevIndex = currentIndex.value - 1;
+
+    if (prevIndex >= 0) {
+      playSong(playlist.value[prevIndex]);
+    }
+  }
+
+  return {
+    currentSong,
+    currentTime,
+    isPlaying,
+    isMuted,
+    volume,
+    playlist,
+    currentIndex,
+
+    currentSongTitle,
+    currentSongDuration,
+    durationInSeconds,
+
+    playSong,
+    togglePlayPause,
+    startProgress,
+    stopProgress,
+    setCurrentTime,
+    setVolume,
+    toggleMute,
+    setPlaylist,
+    playNextSong,
+    playPreviousSong,
+  };
 });
