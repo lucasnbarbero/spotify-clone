@@ -14,10 +14,10 @@ favoritesStore.loadFromLocalStorage();
 <template>
   <div class="h-screen flex flex-col bg-black text-white">
     <div class="flex flex-1 overflow-hidden">
-      <Sidebar class="w-64 bg-neutral-900 p-4" />
+      <Sidebar class="hidden md:block w-64 bg-neutral-900 p-4" />
       <div class="flex-1 flex flex-col overflow-hidden">
         <Header class="bg-neutral-800 p-4" />
-        <main class="flex-1 overflow-y-auto p-4 bg-black">
+        <main class="flex-1 overflow-y-auto px-2 sm:px-4 py-4 md:py-6 bg-black">
           <RouterView />
         </main>
       </div>
